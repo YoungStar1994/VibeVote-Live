@@ -3,7 +3,8 @@ import { io } from 'socket.io-client';
 import confetti from 'canvas-confetti';
 import { QRCodeCanvas } from 'qrcode.react';
 
-const SOCKET_SERVER = 'http://localhost:3001';
+// 自动识别后端地址
+const SOCKET_SERVER = `${window.location.protocol}//${window.location.hostname}:3001`;
 
 const Screen = () => {
     const [programs, setPrograms] = useState([]);

@@ -3,7 +3,8 @@ import { Heart, QrCode } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { io } from 'socket.io-client';
 
-const API_BASE = 'http://localhost:3001';
+// 自动识别后端地址
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:3001`;
 
 // 简单的设备指纹生成函数
 const getFingerprint = () => {

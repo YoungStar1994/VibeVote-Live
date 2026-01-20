@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, RefreshCw, Save, X, QrCode, Lock } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
-const API_BASE = 'http://localhost:3001';
+// 自动识别后端地址：如果是通过公网或局域网 IP 访问，则 API 也自动导向该 IP
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:3001`;
 
 const Admin = () => {
     const [programs, setPrograms] = useState([]);
