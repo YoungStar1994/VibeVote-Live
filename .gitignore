@@ -6,6 +6,10 @@ server/node_modules/
 # Production Build
 client/dist/
 
+# Database
+server/data.db
+server/data.db-journal
+
 # Environment Variables
 .env
 .env.local
