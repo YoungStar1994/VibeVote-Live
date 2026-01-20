@@ -65,11 +65,10 @@ try {
     if (rowCount.count === 0) {
         const insert = db.prepare('INSERT INTO programs (name, category, votes) VALUES (?, ?, ?)');
         const defaultPrograms = [
-            { name: "精彩开场秀", category: "开场节目", votes: 0 },
-            { name: "创意光影舞", category: "舞蹈", votes: 0 },
-            { name: "团队风采展示", category: "展示", votes: 0 },
-            { name: "互动魔术表演", category: "魔术", votes: 0 },
-            { name: "年度荣誉颁奖", category: "颁奖", votes: 0 }
+            { name: "《开门红》", category: "武清门店", votes: 0 },
+            { name: "《八方来财》", category: "津南门店", votes: 0 },
+            { name: "《会议室的“肌”密争夺战》", category: "滨海门店", votes: 0 },
+            { name: "《舞动疗愈》", category: "仁恒门店", votes: 0 }
         ];
         for (const p of defaultPrograms) {
             insert.run(p.name, p.category, p.votes);
@@ -78,7 +77,7 @@ try {
 
     const settingsCount = db.prepare('SELECT count(*) as count FROM settings').get();
     if (settingsCount.count === 0) {
-        db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('event_title', '2026 年度盛典实时投票');
+        db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('event_title', '2026 年会节目表演实时投票');
     }
 
     const userCount = db.prepare('SELECT count(*) as count FROM users').get();
