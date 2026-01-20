@@ -73,6 +73,19 @@ const Screen = () => {
                     padding: '1rem'
                 }}>
                     {programs.map((program, index) => {
+                        // 颜色系统定义
+                        const colors = [
+                            { primary: '#efd3d7', secondary: '#8e9aaf', glow: 'rgba(239, 211, 215, 0.4)' }, // 1st: 粉灰
+                            { primary: '#cbc0d3', secondary: '#8e9aaf', glow: 'rgba(203, 192, 211, 0.3)' }, // 2nd: 紫灰
+                            { primary: '#dee2e6', secondary: '#adb5bd', glow: 'rgba(222, 226, 230, 0.2)' }, // 3rd: 浅灰
+                            { primary: '#f7d1cd', secondary: '#e8acb1', glow: 'rgba(247, 209, 205, 0.2)' }, // 4th: 珊瑚红
+                            { primary: '#e2ece9', secondary: '#bccad6', glow: 'rgba(226, 236, 233, 0.2)' }, // 5th: 豆沙绿
+                        ];
+                        const itemColor = colors[index] || { primary: 'rgba(255,255,255,0.4)', secondary: 'rgba(255,255,255,0.1)', glow: 'none' };
+
+                        // 比例逻辑调整：
+                        // 1. 设置一个基础高度 (4px)，即使 0 票也显示极细的线条
+                        // 2. 使用更激进的非线性比例，让差距在视觉上更明显但不会完全消失
                         const barHeight = totalVotes === 0 ? 0 : (program.votes / maxVotes) * 100;
 
                         return (
@@ -80,9 +93,10 @@ const Screen = () => {
                                 flex: 1,
                                 display: 'flex',
                                 flexDirection: 'column',
-                                transition: 'all 0.8s ease'
+                                transition: 'all 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67)',
+                                filter: index >= 3 ? 'grayscale(0.3)' : 'none'
                             }}>
-                                {/* 柱体轨道 - 负责提供定位基准 */}
+                                {/* 柱体轨道 */}
                                 <div style={{
                                     flex: 1,
                                     position: 'relative',
@@ -96,31 +110,29 @@ const Screen = () => {
                                     <div style={{
                                         position: 'absolute',
                                         bottom: `calc(${barHeight}% + 15px)`,
-                                        fontSize: '2.8rem',
+                                        fontSize: index === 0 ? '3.5rem' : '2.5rem',
                                         fontWeight: '900',
-                                        color: index === 0 ? '#efd3d7' : 'white',
-                                        textShadow: '0 4px 10px rgba(0,0,0,0.5)',
-                                        transition: 'bottom 1s cubic-bezier(0.17, 0.67, 0.83, 0.67)',
-                                        zIndex: 10
+                                        color: itemColor.primary,
+                                        textShadow: `0 0 15px ${itemColor.glow}, 0 4px 10px rgba(0,0,0,0.5)`,
+                                        transition: 'all 1s cubic-bezier(0.17, 0.67, 0.83, 0.67)',
+                                        zIndex: 10,
+                                        transform: index === 0 ? 'scale(1.2)' : 'scale(1)'
                                     }}>
                                         {program.votes}
                                     </div>
 
                                     {/* 3D 柱体 */}
                                     <div style={{
-                                        width: '75%',
+                                        width: index === 0 ? '85%' : '75%',
                                         height: `${barHeight}%`,
-                                        minHeight: barHeight > 0 ? '4px' : '0',
-                                        background: index === 0
-                                            ? 'linear-gradient(to top, #8e9aaf 0%, #efd3d7 100%)'
-                                            : 'linear-gradient(to top, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.2) 100%)',
-                                        borderRadius: '12px 12px 0 0',
-                                        boxShadow: index === 0
-                                            ? '0 0 50px rgba(239, 211, 215, 0.4), inset 0 2px 5px rgba(255,255,255,0.5)'
-                                            : 'inset 0 1px 2px rgba(255,255,255,0.2)',
-                                        transition: 'height 1s cubic-bezier(0.17, 0.67, 0.83, 0.67)',
+                                        minHeight: program.votes > 0 ? '8px' : '4px',
+                                        background: `linear-gradient(to top, ${itemColor.secondary} 0%, ${itemColor.primary} 100%)`,
+                                        borderRadius: '16px 16px 0 0',
+                                        boxShadow: `0 0 40px ${itemColor.glow}, inset 0 2px 5px rgba(255,255,255,0.3)`,
+                                        transition: 'all 1s cubic-bezier(0.17, 0.67, 0.83, 0.67)',
                                         position: 'relative',
-                                        border: '1px solid rgba(255,255,255,0.1)'
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        opacity: program.votes === 0 ? 0.3 : 1
                                     }}>
                                         {/* 侧边高光装饰 */}
                                         <div style={{
@@ -128,9 +140,9 @@ const Screen = () => {
                                             top: 0,
                                             left: '4px',
                                             bottom: 0,
-                                            width: '20%',
-                                            background: 'rgba(255,255,255,0.05)',
-                                            borderRadius: '8px 0 0 0'
+                                            width: '15%',
+                                            background: 'rgba(255,255,255,0.15)',
+                                            borderRadius: '12px 0 0 0'
                                         }} />
                                     </div>
                                 </div>
@@ -139,32 +151,40 @@ const Screen = () => {
                                 <div style={{
                                     textAlign: 'center',
                                     padding: '1.5rem 0.5rem',
-                                    background: 'rgba(255,255,255,0.03)',
-                                    borderRadius: '15px',
-                                    border: '1px solid rgba(255,255,255,0.05)',
-                                    height: '11rem',
+                                    background: index === 0 ? 'rgba(239, 211, 215, 0.1)' : 'rgba(255,255,255,0.03)',
+                                    borderRadius: '20px',
+                                    border: index === 0 ? '1px solid rgba(239, 211, 215, 0.3)' : '1px solid rgba(255,255,255,0.05)',
+                                    height: '12rem',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    transition: 'all 0.5s ease',
+                                    transform: index === 0 ? 'translateY(-5px)' : 'none',
+                                    boxShadow: index === 0 ? '0 10px 30px rgba(0,0,0,0.3)' : 'none'
                                 }}>
-                                    <div style={{ fontSize: '1.2rem', color: '#cbc0d3', marginBottom: '0.4rem' }}>{program.category}</div>
+                                    <div style={{ fontSize: '1.3rem', color: '#cbc0d3', marginBottom: '0.5rem', letterSpacing: '2px' }}>
+                                        {program.category}
+                                    </div>
                                     <div style={{
-                                        fontSize: '1.6rem',
-                                        fontWeight: '700',
-                                        lineHeight: '1.2',
+                                        fontSize: index === 0 ? '2rem' : '1.7rem',
+                                        fontWeight: '800',
+                                        lineHeight: '1.3',
                                         marginBottom: '0.8rem',
-                                        height: '3.8rem',
+                                        height: '4.5rem',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        justifyContent: 'center'
+                                        justifyContent: 'center',
+                                        color: index === 0 ? '#efd3d7' : 'white',
+                                        padding: '0 10px'
                                     }}>
                                         {program.name}
                                     </div>
                                     <div style={{
-                                        fontSize: '2.2rem',
-                                        color: index === 0 ? '#ffd700' : index === 1 ? '#e0e0e0' : index === 2 ? '#cd7f32' : 'white'
+                                        fontSize: index === 0 ? '2.8rem' : '2.2rem',
+                                        color: index === 0 ? '#ffd700' : index === 1 ? '#e0e0e0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.5)',
+                                        filter: index < 3 ? 'drop-shadow(0 0 10px rgba(255,215,0,0.3))' : 'none'
                                     }}>
-                                        {index === 0 ? '👑' : `#${index + 1}`}
+                                        {index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                                     </div>
                                 </div>
                             </div>
