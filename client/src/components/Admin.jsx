@@ -17,6 +17,10 @@ const Admin = () => {
     const [settings, setSettings] = useState({ event_title: '' });
     const [isEditingSettings, setIsEditingSettings] = useState(false);
 
+    useEffect(() => {
+        document.title = "VibeVote 控制中心 | 管理后台";
+    }, []);
+
     const handleLogin = async (e) => {
         e.preventDefault();
         const res = await fetch(`${API_BASE}/api/admin/login`, {

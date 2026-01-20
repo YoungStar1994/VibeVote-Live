@@ -1,19 +1,31 @@
 #!/bin/bash
 
-# 瑜伽投票程序 - 一键启停脚本
+# VibeVote-Live - 2026 年度盛典实时投票系统
+# 一键启停脚本 (已适配云服务器 0.0.0.0 部署)
 
 # 获取脚本所在目录
 BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 CLIENT_DIR="$BASE_DIR/client"
 SERVER_DIR="$BASE_DIR/server"
 
+# 获取内网 IP (适配 Mac 和 Linux)
+LOCAL_IP="localhost"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    LOCAL_IP=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || echo "localhost")
+else
+    LOCAL_IP=$(hostname -I | awk '{print $1}' || echo "localhost")
+fi
+
 # 颜色定义
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== 瑜伽普拉提 2026 年会投票系统 ===${NC}"
+echo -e "${BLUE}=======================================${NC}"
+echo -e "${BLUE}    VibeVote-Live 实时互动投票系统    ${NC}"
+echo -e "${BLUE}=======================================${NC}"
 
 # 检查依赖
 if [ ! -d "$SERVER_DIR/node_modules" ]; then
@@ -36,21 +48,27 @@ cleanup() {
 # 捕获 Ctrl+C
 trap cleanup SIGINT
 
-echo -e "${GREEN}正在启动后端服务 (Port: 3001)...${NC}"
-cd "$SERVER_DIR" && npm run dev > /dev/null 2>&1 &
+echo -e "${GREEN}正在启动后端服务 (Port: 3001, Listen: 0.0.0.0)...${NC}"
+cd "$SERVER_DIR" && npm start > /dev/null 2>&1 &
 SERVER_PID=$!
 
-echo -e "${GREEN}正在启动前端服务 (Port: 5173)...${NC}"
+echo -e "${GREEN}正在启动前端服务 (Port: 5173, Host: true)...${NC}"
 cd "$CLIENT_DIR" && npm run dev > /dev/null 2>&1 &
 CLIENT_PID=$!
 
+sleep 2 # 等待服务初始化
+
 echo -e "${BLUE}---------------------------------------${NC}"
-echo -e "🚀 服务已启动！"
-echo -e "💻 大屏幕终端: ${GREEN}http://localhost:5173/${NC}"
-echo -e "📱 观众投票端: ${GREEN}http://localhost:5173/vote${NC}"
-echo -e "⚙️  管理后台:   ${GREEN}http://localhost:5173/admin${NC}"
+echo -e "🚀 ${GREEN}服务已就绪！${NC}"
+echo -e "💻 ${BLUE}大屏幕展示: ${NC} http://$LOCAL_IP:5173/"
+echo -e "📱 ${BLUE}观众投票端: ${NC} http://$LOCAL_IP:5173/vote"
+echo -e "⚙️  ${BLUE}管理后台:  ${NC} http://$LOCAL_IP:5173/admin"
 echo -e "${BLUE}---------------------------------------${NC}"
-echo -e "提示: 按 ${RED}Ctrl+C${NC} 可以停止并退出所有服务。"
+echo -e "${YELLOW}提示:${NC}"
+echo -e "1. 现场投票请务必确保您的移动设备与服务器处于同一网络 (或使用公网IP)。"
+echo -e "2. 管理员默认密码: ${BLUE}admin / admin123${NC}"
+echo -e "3. 按 ${RED}Ctrl+C${NC} 可以安全停止所有服务。"
+echo -e "${BLUE}---------------------------------------${NC}"
 
 # 保持脚本运行，等待退出信号
 wait

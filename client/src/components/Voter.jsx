@@ -63,6 +63,12 @@ const Voter = () => {
         return () => socket.disconnect();
     }, []);
 
+    useEffect(() => {
+        if (settings.event_title) {
+            document.title = `${settings.event_title} - 投票端`;
+        }
+    }, [settings.event_title]);
+
     const handleVote = async (programId) => {
         if (votedId) return;
 

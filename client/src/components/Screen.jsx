@@ -39,6 +39,12 @@ const Screen = () => {
         return () => socket.disconnect();
     }, []);
 
+    useEffect(() => {
+        if (eventTitle) {
+            document.title = `${eventTitle} - 实时大屏`;
+        }
+    }, [eventTitle]);
+
     const totalVotes = programs.reduce((acc, curr) => acc + curr.votes, 0);
     const maxVotes = programs.length > 0 ? Math.max(...programs.map(p => p.votes), 1) : 1;
 
