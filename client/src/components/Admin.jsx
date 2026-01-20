@@ -73,15 +73,26 @@ const Admin = () => {
         const method = id ? 'PUT' : 'POST';
         const url = id ? `${API_BASE}/api/programs/${id}` : `${API_BASE}/api/programs`;
 
-        await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(editForm)
-        });
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editForm)
+            });
 
-        setEditingId(null);
-        setIsAdding(false);
-        fetchPrograms();
+            const data = await res.json();
+            if (data.error) {
+                alert(`保存失败: ${data.error}`);
+                return;
+            }
+
+            setEditingId(null);
+            setIsAdding(false);
+            fetchPrograms();
+        } catch (err) {
+            console.error('Save error:', err);
+            alert('服务器通信失败，请检查网络或稍后再试');
+        }
     };
 
     const handleDelete = async (id) => {

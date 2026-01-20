@@ -49,14 +49,17 @@ cleanup() {
 trap cleanup SIGINT
 
 echo -e "${GREEN}正在启动后端服务 (Port: 3001, Listen: 0.0.0.0)...${NC}"
-cd "$SERVER_DIR" && npm start > /dev/null 2>&1 &
+cd "$SERVER_DIR" && npm start > "$BASE_DIR/server.log" 2>&1 &
 SERVER_PID=$!
 
 echo -e "${GREEN}正在启动前端服务 (Port: 5173, Host: true)...${NC}"
-cd "$CLIENT_DIR" && npm run dev > /dev/null 2>&1 &
+cd "$CLIENT_DIR" && npm run dev > "$BASE_DIR/client.log" 2>&1 &
 CLIENT_PID=$!
 
 sleep 2 # 等待服务初始化
+
+# 检查日志文件是否存在
+touch "$BASE_DIR/server.log" "$BASE_DIR/client.log"
 
 echo -e "${BLUE}---------------------------------------${NC}"
 echo -e "🚀 ${GREEN}服务已就绪！${NC}"
@@ -64,10 +67,14 @@ echo -e "💻 ${BLUE}大屏幕展示: ${NC} http://$LOCAL_IP:5173/"
 echo -e "📱 ${BLUE}观众投票端: ${NC} http://$LOCAL_IP:5173/vote"
 echo -e "⚙️  ${BLUE}管理后台:  ${NC} http://$LOCAL_IP:5173/admin"
 echo -e "${BLUE}---------------------------------------${NC}"
+echo -e "${YELLOW}日志追踪:${NC}"
+echo -e "📄 后端日志: tail -f server.log"
+echo -e "📄 前端日志: tail -f client.log"
+echo -e "${BLUE}---------------------------------------${NC}"
 echo -e "${YELLOW}提示:${NC}"
-echo -e "1. 现场投票请务必确保您的移动设备与服务器处于同一网络 (或使用公网IP)。"
+echo -e "1. 现场投票请务必确保您的移动设备与服务器处于同一网络。"
 echo -e "2. 管理员默认密码: ${BLUE}admin / admin123${NC}"
-echo -e "3. 按 ${RED}Ctrl+C${NC} 可以安全停止所有服务。"
+echo -e "3. 按 ${RED}Ctrl+C${NC} 可以安全停止所有服务并清理进程。"
 echo -e "${BLUE}---------------------------------------${NC}"
 
 # 保持脚本运行，等待退出信号
