@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import confetti from 'canvas-confetti';
 import { QRCodeCanvas } from 'qrcode.react';
 
-// 自动识别后端地址
 // 自动识别后端地址：如果是生产环境（端口不是 5173），直接使用当前 origin
 const SOCKET_SERVER = window.location.port === '5173'
     ? `${window.location.protocol}//${window.location.hostname}:3001`
@@ -12,6 +11,7 @@ const SOCKET_SERVER = window.location.port === '5173'
 const Screen = () => {
     const [programs, setPrograms] = useState([]);
     const [eventTitle, setEventTitle] = useState('加载中...');
+    const lastConfettiTime = useRef(0);
 
     useEffect(() => {
         const socket = io(SOCKET_SERVER);
@@ -27,12 +27,18 @@ const Screen = () => {
 
         socket.on('vote_update', (data) => {
             setPrograms(data.sort((a, b) => b.votes - a.votes));
-            confetti({
-                particleCount: 150,
-                spread: 100,
-                origin: { y: 0.6 },
-                colors: ['#8e9aaf', '#cbc0d3', '#efd3d7', '#feeafa']
-            });
+
+            // 💡 节流优化：高并发时限制庆祝动画频率 (每秒最多触发一次)
+            const now = Date.now();
+            if (now - lastConfettiTime.current > 1000) {
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    colors: ['#8e9aaf', '#cbc0d3', '#efd3d7', '#feeafa']
+                });
+                lastConfettiTime.current = now;
+            }
         });
 
         socket.on('settings_update', (data) => {

@@ -239,6 +239,7 @@ app.post('/api/reset', (req, res) => {
 // 投票接口 (数据库持久化 + 增强防刷)
 app.post('/api/vote', (req, res) => {
     const { programId, userId, fingerprint } = req.body;
+    console.log(`[VOTE_API] 收到投票请求: Program:${programId}, User:${userId}`);
     const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const userAgent = req.headers['user-agent'];
 
