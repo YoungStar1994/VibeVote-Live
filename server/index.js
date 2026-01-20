@@ -36,22 +36,42 @@ db.exec(`
         program_id INTEGER,
         FOREIGN KEY (program_id) REFERENCES programs(id)
     );
+
+    CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS users (
+        username TEXT PRIMARY KEY,
+        password TEXT NOT NULL
+    );
 `);
 
-// 如果节目表为空，初始化默认数据
+// 初始化默认数据
 const rowCount = db.prepare('SELECT count(*) as count FROM programs').get();
 if (rowCount.count === 0) {
     const insert = db.prepare('INSERT INTO programs (name, category, votes) VALUES (?, ?, ?)');
     const defaultPrograms = [
-        { name: "开场瑜伽舞：流动的韵律", category: "瑜伽", votes: 0 },
-        { name: "普拉提器械展示：核心力量", category: "普拉提", votes: 0 },
-        { name: "空中瑜伽：云端漫步", category: "瑜伽", votes: 0 },
-        { name: "双人伴侣瑜伽：信任的力量", category: "瑜伽", votes: 0 },
-        { name: "禅修与呼吸：宁静之夜", category: "冥想", votes: 0 }
+        { name: "精彩开场秀", category: "开场节目", votes: 0 },
+        { name: "创意光影舞", category: "舞蹈", votes: 0 },
+        { name: "团队风采展示", category: "展示", votes: 0 },
+        { name: "互动魔术表演", category: "魔术", votes: 0 },
+        { name: "年度荣誉颁奖", category: "颁奖", votes: 0 }
     ];
     for (const p of defaultPrograms) {
         insert.run(p.name, p.category, p.votes);
     }
+}
+
+const settingsCount = db.prepare('SELECT count(*) as count FROM settings').get();
+if (settingsCount.count === 0) {
+    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run('event_title', '2026 年度盛典实时投票');
+}
+
+const userCount = db.prepare('SELECT count(*) as count FROM users').get();
+if (userCount.count === 0) {
+    db.prepare('INSERT INTO users (username, password) VALUES (?, ?)').run('admin', 'admin123');
 }
 
 // 辅助函数：获取所有节目并广播
@@ -62,6 +82,35 @@ const broadcastUpdate = () => {
 };
 
 // --- API 接口 ---
+
+// 获取系统设置
+app.get('/api/settings', (req, res) => {
+    const settings = db.prepare('SELECT * FROM settings').all();
+    const config = {};
+    settings.forEach(s => config[s.key] = s.value);
+    res.json(config);
+});
+
+// 更新系统设置
+app.post('/api/settings', (req, res) => {
+    const { event_title } = req.body;
+    if (event_title) {
+        db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('event_title', event_title);
+        io.emit('settings_update', { event_title });
+    }
+    res.json({ success: true });
+});
+
+// 管理员登录
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = db.prepare('SELECT * FROM users WHERE username = ? AND password = ?').get(username, password);
+    if (user) {
+        res.json({ success: true, token: 'vibevote_secret_token_2026' }); // 静态 token 模拟
+    } else {
+        res.status(401).json({ success: false, message: '用户名或密码错误' });
+    }
+});
 
 // 获取节目列表
 app.get('/api/programs', (req, res) => {

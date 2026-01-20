@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, QrCode } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { io } from 'socket.io-client';
 
 const API_BASE = 'http://localhost:3001';
@@ -20,6 +21,7 @@ const getFingerprint = () => {
 const Voter = () => {
     const [programs, setPrograms] = useState([]);
     const [votedId, setVotedId] = useState(null);
+    const [eventTitle, setEventTitle] = useState('载入中...');
     const [fingerprint] = useState(getFingerprint());
     const [userId] = useState(() => {
         let id = localStorage.getItem('yoga_vote_user_id');
@@ -33,11 +35,20 @@ const Voter = () => {
     useEffect(() => {
         const socket = io(API_BASE);
 
+        // 获取初始设置
+        fetch(`${API_BASE}/api/settings`)
+            .then(res => res.json())
+            .then(data => setEventTitle(data.event_title || '年度盛典现场投票'));
+
         // 监听管理员发起的重置信号
         socket.on('reset_voted_status', () => {
             localStorage.removeItem('has_voted_for');
             setVotedId(null);
             alert('投票已重置，您可以重新投票！');
+        });
+
+        socket.on('settings_update', (data) => {
+            if (data.event_title) setEventTitle(data.event_title);
         });
 
         fetch(`${API_BASE}/api/programs`)
@@ -77,12 +88,35 @@ const Voter = () => {
         }
     };
 
+    const [showQR, setShowQR] = useState(false);
+
     return (
         <div className="container" style={{ paddingBottom: '4rem' }}>
-            <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ color: 'var(--primary)', fontSize: '1.8rem' }}>瑜伽普拉提年会</h1>
+            <header style={{ textAlign: 'center', marginBottom: '2rem', position: 'relative' }}>
+                <div style={{ position: 'absolute', right: 0, top: 0 }}>
+                    <button
+                        onClick={() => setShowQR(!showQR)}
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: '10px' }}
+                    >
+                        <QrCode size={24} />
+                    </button>
+                </div>
+
+                <h1 style={{ color: 'var(--primary)', fontSize: '1.8rem', padding: '0 40px' }}>{eventTitle}</h1>
                 <p style={{ color: '#666', fontSize: '1rem' }}>请为您心仪的节目投上宝贵一票</p>
                 <div style={{ fontSize: '0.7rem', color: '#ccc', marginTop: '0.5rem' }}>ID: {userId.slice(-4)}</div>
+
+                {showQR && (
+                    <div className="glass-card animate-fade-in" style={{
+                        margin: '1rem auto',
+                        padding: '1.5rem',
+                        display: 'inline-block',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                    }}>
+                        <QRCodeCanvas value={`${window.location.origin}/vote`} size={150} />
+                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', color: 'var(--primary)' }}>让旁边的小伙伴扫码参与</p>
+                    </div>
+                )}
             </header>
 
             <div style={{ display: 'grid', gap: '1.5rem' }}>
