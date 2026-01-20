@@ -171,9 +171,6 @@ const Admin = () => {
                             进入管理页面
                         </button>
                     </form>
-                    <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: '#999' }}>
-                        Default: admin / admin123
-                    </div>
                 </div>
             </div>
         );
