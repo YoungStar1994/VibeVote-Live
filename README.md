@@ -2,7 +2,8 @@
 
 VibeVote-Live 是一个专为各类年会、盛典、创意市集、路演演说设计的**全流程实时互动投票系统**。系统采用现代化的视觉设计，通过手机端扫码投票与大屏幕 3D 实时渲染，极大地提升了活动现场的参与感与品牌质感。
 
-![Uploading image.png…]()
+<img width="1349" height="605" alt="image" src="https://github.com/user-attachments/assets/412345bc-1383-4d6e-98a1-70d5c7d458ab" />
+
 
 
 ---
