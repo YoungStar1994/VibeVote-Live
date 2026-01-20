@@ -16,7 +16,12 @@ const getFingerprint = () => {
         new Date().getTimezoneOffset(),
         navigator.hardwareConcurrency
     ];
-    return btoa(info.join('|'));
+    try {
+        // 使用 encodeURIComponent 处理特殊字符，防止 btoa 报错
+        return btoa(encodeURIComponent(info.join('|')));
+    } catch (e) {
+        return 'fallback_fp_' + Math.random().toString(36).substr(2, 9);
+    }
 };
 
 const Voter = () => {
@@ -64,10 +69,10 @@ const Voter = () => {
     }, []);
 
     useEffect(() => {
-        if (settings.event_title) {
-            document.title = `${settings.event_title} - 投票端`;
+        if (eventTitle) {
+            document.title = `${eventTitle} - 投票端`;
         }
-    }, [settings.event_title]);
+    }, [eventTitle]);
 
     const handleVote = async (programId) => {
         if (votedId) return;

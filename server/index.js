@@ -18,7 +18,8 @@ const io = new Server(server, {
 });
 
 // 初始化数据库
-const db = new Database(path.join(__dirname, 'data.db'));
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'data.db');
+const db = new Database(dbPath);
 
 // 💡 核心稳定性优化：开启 WAL 模式，防止在高并发投票时出现 "Database is locked" 导致进程奔溃
 db.pragma('journal_mode = WAL');
@@ -288,7 +289,11 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Ready for connections on all interfaces (0.0.0.0)`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log(`Ready for connections on all interfaces (0.0.0.0)`);
+    });
+}
+
+module.exports = { app, server, db };

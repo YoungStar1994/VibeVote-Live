@@ -141,8 +141,9 @@ const Admin = () => {
 
                     <form onSubmit={handleLogin} style={{ display: 'grid', gap: '1.2rem' }}>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', color: '#444' }}>用户名</label>
+                            <label htmlFor="username" style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', color: '#444' }}>用户名</label>
                             <input
+                                id="username"
                                 type="text"
                                 className="form-input"
                                 style={{ width: '100%', padding: '0.8rem' }}
@@ -152,8 +153,9 @@ const Admin = () => {
                             />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', color: '#444' }}>密码</label>
+                            <label htmlFor="password" style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', color: '#444' }}>密码</label>
                             <input
+                                id="password"
                                 type="password"
                                 className="form-input"
                                 style={{ width: '100%', padding: '0.8rem' }}

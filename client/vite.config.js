@@ -6,5 +6,9 @@ export default defineConfig({
   server: {
     host: true, // 允许通过 IP 访问
     port: 5173
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
   }
 })
