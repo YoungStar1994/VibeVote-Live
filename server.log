@@ -9,3 +9,4 @@
 [32m[nodemon] starting `node index.js`[39m
 Server is running on port 3001
 Ready for connections on all interfaces (0.0.0.0)
+Build directory: /Users/yangxing/vscode_project/testproject/client/dist

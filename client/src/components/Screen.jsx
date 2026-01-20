@@ -4,7 +4,10 @@ import confetti from 'canvas-confetti';
 import { QRCodeCanvas } from 'qrcode.react';
 
 // 自动识别后端地址
-const SOCKET_SERVER = `${window.location.protocol}//${window.location.hostname}:3001`;
+// 自动识别后端地址：如果是生产环境（端口不是 5173），直接使用当前 origin
+const SOCKET_SERVER = window.location.port === '5173'
+    ? `${window.location.protocol}//${window.location.hostname}:3001`
+    : window.location.origin;
 
 const Screen = () => {
     const [programs, setPrograms] = useState([]);
@@ -64,10 +67,10 @@ const Screen = () => {
                 display: 'flex',
                 flexDirection: 'column'
             }}>
-                <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                <header style={{ textAlign: 'center', marginBottom: '1rem' }}>
                     <h1 style={{
-                        fontSize: '4rem',
-                        marginBottom: '0.5rem',
+                        fontSize: '3rem',
+                        marginBottom: '0.2rem',
                         textShadow: '0 0 20px rgba(239, 211, 215, 0.3)',
                         background: 'linear-gradient(45deg, #efd3d7, #8e9aaf)',
                         WebkitBackgroundClip: 'text',
@@ -76,14 +79,14 @@ const Screen = () => {
                     }}>
                         {eventTitle}
                     </h1>
-                    <div style={{ fontSize: '1.8rem', opacity: 0.9 }}>
-                        实时投票总数: <span style={{ color: '#efd3d7', fontSize: '2.5rem', fontWeight: 'bold' }}>{totalVotes}</span>
+                    <div style={{ fontSize: '1.4rem', opacity: 0.9 }}>
+                        实时投票总数: <span style={{ color: '#efd3d7', fontSize: '2rem', fontWeight: 'bold' }}>{totalVotes}</span>
                     </div>
                 </header>
 
-                {/* 图表核心区域 - 增加权重 */}
+                {/* 图表核心区域 - 增加权重使柱状图更长 */}
                 <div style={{
-                    flex: '2.5',
+                    flex: '4',
                     display: 'flex',
                     alignItems: 'stretch',
                     justifyContent: 'space-around',
@@ -122,8 +125,8 @@ const Screen = () => {
                                     {/* 票数标签 */}
                                     <div style={{
                                         position: 'absolute',
-                                        bottom: `calc(${barHeight}% + 10px)`,
-                                        fontSize: index === 0 ? '4rem' : '2.8rem',
+                                        bottom: `calc(${barHeight}% + 5px)`,
+                                        fontSize: index === 0 ? '3rem' : '2rem',
                                         fontWeight: '900',
                                         color: itemColor.primary,
                                         textShadow: `0 0 15px ${itemColor.glow}, 0 4px 10px rgba(0,0,0,0.5)`,
@@ -163,22 +166,22 @@ const Screen = () => {
                                 {/* 节目底部卡片 */}
                                 <div style={{
                                     textAlign: 'center',
-                                    padding: '1rem 0.8rem',
+                                    padding: '0.8rem 0.6rem',
                                     background: index === 0 ? 'rgba(239, 211, 215, 0.12)' : 'rgba(255,255,255,0.03)',
-                                    borderRadius: '24px',
+                                    borderRadius: '20px',
                                     border: index === 0 ? '1.5px solid rgba(239, 211, 215, 0.4)' : '1px solid rgba(255,255,255,0.06)',
-                                    height: '11.5rem',
+                                    height: '8.5rem',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    justifyContent: 'space-between',
+                                    justifyContent: 'center',
                                     transition: 'all 0.5s ease',
                                     boxShadow: index === 0 ? '0 15px 35px rgba(0,0,0,0.3)' : 'none',
                                     backdropFilter: 'blur(5px)'
                                 }}>
                                     <div style={{
-                                        fontSize: '1.1rem',
+                                        fontSize: '0.9rem',
                                         color: '#cbc0d3',
-                                        letterSpacing: '3px',
+                                        letterSpacing: '2px',
                                         textTransform: 'uppercase',
                                         opacity: 0.8
                                     }}>
@@ -186,23 +189,23 @@ const Screen = () => {
                                     </div>
 
                                     <div style={{
-                                        fontSize: index === 0 ? '1.9rem' : '1.6rem',
+                                        fontSize: index === 0 ? '1.5rem' : '1.3rem',
                                         fontWeight: '850',
-                                        lineHeight: '1.4',
+                                        lineHeight: '1.2',
                                         color: index === 0 ? '#efd3d7' : 'white',
                                         wordBreak: 'break-all',
                                         display: '-webkit-box',
                                         WebkitLineClamp: '2',
                                         WebkitBoxOrient: 'vertical',
                                         overflow: 'hidden',
-                                        margin: '0.4rem 0',
+                                        margin: '0.3rem 0',
                                         textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                                     }}>
                                         {program.name}
                                     </div>
 
                                     <div style={{
-                                        fontSize: index === 0 ? '3.5rem' : '2.2rem',
+                                        fontSize: index === 0 ? '2.5rem' : '1.8rem',
                                         color: index === 0 ? '#ffd700' : index === 1 ? '#e0e0e0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.3)',
                                         filter: index < 3 ? 'drop-shadow(0 0 12px rgba(255,215,0,0.4))' : 'none',
                                         lineHeight: '1'

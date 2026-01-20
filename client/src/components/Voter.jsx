@@ -4,7 +4,10 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { io } from 'socket.io-client';
 
 // 自动识别后端地址
-const API_BASE = `${window.location.protocol}//${window.location.hostname}:3001`;
+// 自动识别后端地址：如果是生产环境（端口不是 5173），直接使用当前 origin
+const API_BASE = window.location.port === '5173'
+    ? `${window.location.protocol}//${window.location.hostname}:3001`
+    : window.location.origin;
 
 // 简单的设备指纹生成函数
 const getFingerprint = () => {

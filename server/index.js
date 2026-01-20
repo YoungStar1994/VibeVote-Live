@@ -283,6 +283,33 @@ app.post('/api/vote', (req, res) => {
     }
 });
 
+// --- 静态文件服务 (生产环境部署) ---
+
+// 优先通过环境变量获取前端静态目录，默认为同级 client/dist
+const staticPath = path.join(__dirname, '../client/dist');
+
+// 提供静态文件
+app.use(express.static(staticPath));
+
+// 针对单页应用 (SPA)，将所有不匹配的路由重定向到 index.html
+// 针对单页应用 (SPA)，将所有不匹配的路由重定向到 index.html
+app.use((req, res) => {
+    // 如果是 API 请求但未匹配到，则返回 404
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    // 否则返回 index.html (只处理 GET 请求，防止对 POST 等请求造成误操作)
+    if (req.method === 'GET') {
+        res.sendFile(path.join(staticPath, 'index.html'), (err) => {
+            if (err) {
+                res.status(404).send('Static files not found. Please run "npm run build" in client directory.');
+            }
+        });
+    } else {
+        res.status(404).json({ error: 'Not Found' });
+    }
+});
+
 io.on('connection', (socket) => {
     const programs = db.prepare('SELECT * FROM programs').all();
     socket.emit('init_data', programs);
@@ -293,6 +320,7 @@ if (process.env.NODE_ENV !== 'test') {
     server.listen(PORT, '0.0.0.0', () => {
         console.log(`Server is running on port ${PORT}`);
         console.log(`Ready for connections on all interfaces (0.0.0.0)`);
+        console.log(`Build directory: ${staticPath}`);
     });
 }
 
