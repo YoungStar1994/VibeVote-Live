@@ -73,7 +73,29 @@ const Screen = () => {
                 display: 'flex',
                 flexDirection: 'column'
             }}>
-                <header style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                <header style={{ textAlign: 'center', marginBottom: '1rem', position: 'relative' }}>
+                    {/* 右上角二维码 */}
+                    <div style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'white',
+                        padding: '8px',
+                        borderRadius: '10px',
+                        boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 100
+                    }}>
+                        <QRCodeCanvas
+                            value={`${window.location.origin}/vote`}
+                            size={80}
+                            fgColor="#1a1a2e"
+                        />
+                    </div>
+
                     <h1 style={{
                         fontSize: '3rem',
                         marginBottom: '0.2rem',
@@ -222,47 +244,6 @@ const Screen = () => {
                             </div>
                         );
                     })}
-                </div>
-
-                {/* 页脚 - 紧凑中置方案 */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-                    <footer style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '2.5rem',
-                        padding: '0.6rem 2rem',
-                        background: 'rgba(255,255,255,0.04)',
-                        borderRadius: '16px',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255,255,255,0.03)',
-                        width: 'fit-content',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
-                    }}>
-                        <div style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.5)', fontWeight: '500' }}>
-                            微信扫码 · 立即为您的最爱打 Call
-                        </div>
-
-                        <div style={{
-                            background: 'white',
-                            padding: '8px',
-                            borderRadius: '10px',
-                            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px'
-                        }}>
-                            <QRCodeCanvas
-                                value={`${window.location.origin}/vote`}
-                                size={60}
-                                fgColor="#1a1a2e"
-                            />
-                            <div style={{ textAlign: 'left' }}>
-                                <div style={{ fontSize: '0.9rem', color: '#1a1a2e', fontWeight: '900', lineHeight: '1' }}>扫码参与</div>
-                                <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '2px' }}>现场快速投票</div>
-                            </div>
-                        </div>
-                    </footer>
                 </div>
             </div>
         </div>
