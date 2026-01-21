@@ -32,6 +32,7 @@ const Voter = () => {
     const [votedId, setVotedId] = useState(null);
     const [eventTitle, setEventTitle] = useState('载入中...');
     const [fingerprint] = useState(getFingerprint());
+    const [confirmId, setConfirmId] = useState(null); // 确认弹窗
     const [userId] = useState(() => {
         let id = localStorage.getItem('yoga_vote_user_id');
         if (!id) {
@@ -77,8 +78,15 @@ const Voter = () => {
         }
     }, [eventTitle]);
 
-    const handleVote = async (programId) => {
+    const handleVoteClick = (programId) => {
         if (votedId) return;
+        setConfirmId(programId);
+    };
+
+    const confirmVote = async () => {
+        if (!confirmId) return;
+        const programId = confirmId;
+        setConfirmId(null);
 
         try {
             const res = await fetch(`${API_BASE}/api/vote`, {
@@ -87,7 +95,7 @@ const Voter = () => {
                 body: JSON.stringify({
                     programId,
                     userId,
-                    fingerprint // 发送设备指纹给后端校验
+                    fingerprint
                 })
             });
 
@@ -103,10 +111,35 @@ const Voter = () => {
         }
     };
 
+    const handleRevokeVote = async () => {
+        if (!confirm('确定要撤销投票并重新选择吗？')) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/vote/revoke`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    fingerprint
+                })
+            });
+
+            if (res.ok) {
+                setVotedId(null);
+                localStorage.removeItem('has_voted_for');
+            } else {
+                const err = await res.json();
+                alert(err.error || '操作失败');
+            }
+        } catch (error) {
+            alert('网络错误，请稍后重试');
+        }
+    };
+
     const [showQR, setShowQR] = useState(false);
 
     return (
-        <div className="container" style={{ paddingBottom: '4rem' }}>
+        <div className="container" style={{ paddingBottom: '6rem' }}>
             <header style={{ textAlign: 'center', marginBottom: '2rem', position: 'relative' }}>
                 <div style={{ position: 'absolute', right: 0, top: 0 }}>
                     <button
@@ -148,13 +181,14 @@ const Voter = () => {
 
                         <button
                             className={`btn ${votedId === program.id ? 'btn-primary' : 'btn-outline'}`}
-                            onClick={() => handleVote(program.id)}
+                            onClick={() => handleVoteClick(program.id)}
                             disabled={!!votedId}
                             style={{
                                 border: votedId === program.id ? 'none' : '1px solid var(--primary)',
                                 background: votedId === program.id ? 'var(--primary)' : 'transparent',
                                 color: votedId === program.id ? 'white' : 'var(--primary)',
-                                minWidth: '80px'
+                                minWidth: '80px',
+                                opacity: votedId && votedId !== program.id ? 0.5 : 1
                             }}
                         >
                             <Heart size={18} fill={votedId === program.id ? "white" : "none"} />
@@ -164,15 +198,45 @@ const Voter = () => {
                 ))}
             </div>
 
+            {/* 确认弹窗 */}
+            {confirmId && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }} onClick={() => setConfirmId(null)}>
+                    <div className="glass-card animate-scale-in" style={{ padding: '2rem', maxWidth: '300px', width: '90%', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                        <h3 style={{ margin: '0 0 1rem 0' }}>确认投票</h3>
+                        <p style={{ marginBottom: '1.5rem' }}>
+                            您要投给《{programs.find(p => p.id === confirmId)?.name}》吗？
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                            <button className="btn btn-outline" onClick={() => setConfirmId(null)}>取消</button>
+                            <button className="btn btn-primary" onClick={confirmVote}>确认</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {votedId && (
                 <div style={{
                     position: 'fixed', bottom: '1.5rem', left: '1.5rem', right: '1.5rem',
-                    background: 'var(--accent)', padding: '1rem', borderRadius: '15px',
+                    background: 'var(--white)', padding: '1rem', borderRadius: '15px',
                     textAlign: 'center', boxShadow: 'var(--shadow)', color: 'var(--primary)',
                     border: '1px solid var(--primary-light)',
                     zIndex: 100
                 }}>
-                    感谢参与！投票结果将在大屏幕实时展示。
+                    <div style={{ marginBottom: '0.5rem' }}>感谢参与！投票结果将在大屏幕实时展示。</div>
+                    <button
+                        onClick={handleRevokeVote}
+                        style={{
+                            background: 'none', border: 'none',
+                            color: '#999', textDecoration: 'underline',
+                            fontSize: '0.9rem', cursor: 'pointer'
+                        }}
+                    >
+                        撤销投票并重新选择
+                    </button>
                 </div>
             )}
         </div>

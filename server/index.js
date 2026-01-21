@@ -284,6 +284,47 @@ app.post('/api/vote', (req, res) => {
     }
 });
 
+// 撤销投票接口 (改为 POST 以避免 DELETE 请求体兼容性问题)
+app.post('/api/vote/revoke', (req, res) => {
+    const { userId, fingerprint } = req.body;
+    console.log(`[VOTE_API] 收到撤销投票请求: User:${userId}`);
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+
+    if (!fingerprint) {
+        return res.status(400).json({ error: "参数不完整" });
+    }
+
+    const complexId = `${fingerprint}_${ip}_${userAgent}`;
+
+    const transaction = db.transaction(() => {
+        // 查找之前的投票记录
+        const existingVote = db.prepare('SELECT id, program_id FROM votes_log WHERE complex_id = ? OR (user_id IS NOT NULL AND user_id = ?)').get(complexId, userId);
+
+        if (!existingVote) {
+            throw new Error('VOTE_NOT_FOUND');
+        }
+
+        // 删除投票记录
+        db.prepare('DELETE FROM votes_log WHERE id = ?').run(existingVote.id);
+
+        // 减少票数
+        db.prepare('UPDATE programs SET votes = votes - 1 WHERE id = ?').run(existingVote.program_id);
+    });
+
+    try {
+        transaction();
+        broadcastUpdate();
+        res.json({ success: true });
+    } catch (err) {
+        if (err.message === 'VOTE_NOT_FOUND') {
+            return res.status(404).json({ error: "未找到投票记录" });
+        }
+        console.error(err);
+        res.status(500).json({ error: "服务器内部错误" });
+    }
+});
+
 // --- 静态文件服务 (生产环境部署) ---
 
 // 优先通过环境变量获取前端静态目录，默认为同级 client/dist
