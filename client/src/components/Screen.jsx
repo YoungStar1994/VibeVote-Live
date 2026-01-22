@@ -233,12 +233,11 @@ const Screen = () => {
                                     </div>
 
                                     <div style={{
-                                        fontSize: index === 0 ? '2.5rem' : '1.8rem',
-                                        color: index === 0 ? '#ffd700' : index === 1 ? '#e0e0e0' : index === 2 ? '#cd7f32' : 'rgba(255,255,255,0.3)',
-                                        filter: index < 3 ? 'drop-shadow(0 0 12px rgba(255,215,0,0.4))' : 'none',
-                                        lineHeight: '1'
+                                        marginTop: '0.3rem',
+                                        fontSize: '0.9rem',
+                                        color: 'rgba(255,255,255,0.3)'
                                     }}>
-                                        {index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                                        No.{index + 1}
                                     </div>
                                 </div>
                             </div>
