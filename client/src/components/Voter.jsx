@@ -65,12 +65,25 @@ const Voter = () => {
             .then(res => res.json())
             .then(data => {
                 setPrograms(data);
-                const savedVote = localStorage.getItem('has_voted_for');
-                if (savedVote) setVotedId(parseInt(savedVote));
+
+                // 同步服务器端投票状态，解决本地缓存与服务器不一致（如重置后）的问题
+                fetch(`${API_BASE}/api/vote/status?userId=${userId}&fingerprint=${fingerprint}`)
+                    .then(res => res.json())
+                    .then(status => {
+                        if (status.hasVoted) {
+                            setVotedId(status.programId);
+                            localStorage.setItem('has_voted_for', status.programId);
+                        } else {
+                            // 服务器显示未投票，清除本地状态
+                            setVotedId(null);
+                            localStorage.removeItem('has_voted_for');
+                        }
+                    })
+                    .catch(err => console.error("Sync vote status error:", err));
             });
 
         return () => socket.disconnect();
-    }, []);
+    }, [userId, fingerprint]);
 
     useEffect(() => {
         if (eventTitle) {

@@ -236,6 +236,39 @@ app.post('/api/reset', (req, res) => {
     }
 });
 
+// 查询投票状态 (用于客户端初始化同步)
+app.get('/api/vote/status', (req, res) => {
+    try {
+        const { userId, fingerprint } = req.query;
+        if (!userId) {
+            return res.json({ hasVoted: false });
+        }
+
+        let query = 'SELECT program_id FROM votes_log WHERE user_id = ?';
+        let params = [userId];
+
+        // 如果提供了指纹，也可以查（可选增强）
+        if (fingerprint) {
+            const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            const userAgent = req.headers['user-agent'];
+            const complexId = `${fingerprint}_${ip}_${userAgent}`;
+            query += ' OR complex_id = ?';
+            params.push(complexId);
+        }
+
+        const vote = db.prepare(query).get(...params);
+
+        if (vote) {
+            res.json({ hasVoted: true, programId: vote.program_id });
+        } else {
+            res.json({ hasVoted: false });
+        }
+    } catch (err) {
+        console.error('API Error /api/vote/status:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // 投票接口 (数据库持久化 + 增强防刷)
 app.post('/api/vote', (req, res) => {
     const { programId, userId, fingerprint } = req.body;
